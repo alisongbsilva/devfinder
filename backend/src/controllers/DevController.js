@@ -11,9 +11,10 @@ module.exports = {
         return response.json(devs);
     },
 
+    //Criar Dev
     async store (request, response) {
         const { github_username, techs, latitude, longitude } = request.body;
-
+        
         let dev = await Dev.findOne({ github_username });
 
         if (!dev) {
@@ -41,24 +42,25 @@ module.exports = {
     return response.json(dev); 
     },
 
+    //Atualizar Dev
     async update (request, response) {
         const { github_username, name, bio, techs, latitude, longitude } = request.body;
 
         let dev = await Dev.findOne({ github_username });
 
-        if (dev == github_username) {
+        if (dev) {
             const apiResponse = await axios.get(`https://api.github.com/users/${github_username}`);
         
             let { avatar_url } = apiResponse.data;
         
             const techsArray = parseStringAsArray(techs);
-        
+    
             const location = {
                 type: 'Point',
                 coordinates: [longitude, latitude],
             }
         
-            dev = await Dev.updateOne({
+            updateDev = await Dev.updateOne({
                 name,
                 avatar_url,
                 bio,
@@ -67,9 +69,21 @@ module.exports = {
             })
         }
 
+    return response.json(updateDev);     
     },
 
-    async destroy() {
+    //Apagar Dev
+    async destroy( request, response ) {
+        const { github_username } = request.body;
 
+        let dev = await Dev.findOne({ github_username });
+
+        if (dev) {
+            deleteDev = await Dev.deleteOne( {
+                github_username,
+            })
+        }
+
+        return response.json(deleteDev);     
     },
 };
